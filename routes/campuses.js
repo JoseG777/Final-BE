@@ -80,5 +80,17 @@ router.put('/:id', ash(async(req, res) => {
   }
 }));
 
+/* ADD STUDENT TO CAMPUS */
+router.post('/:id/students', ash(async (req, res) => {
+  const { id } = req.params;
+  const studentData = req.body;
+  const campus = await Campus.findByPk(id);
+  if (!campus) {
+    return res.status(404).json({ message: 'Campus not found' });
+  }
+  const student = await Student.create({ ...studentData, campusId: id });
+  res.status(201).json(student);
+}));
+
 // Export router, so that it can be imported to construct the apiRouter (app.js)
 module.exports = router;
