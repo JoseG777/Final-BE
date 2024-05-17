@@ -92,5 +92,31 @@ router.post('/:id/students', ash(async (req, res) => {
   res.status(201).json(student);
 }));
 
+/* REMOVE STUDENT FROM CAMPUS */
+router.delete('/:campusId/students/:studentId', ash(async (req, res) => {
+  try {
+    const { campusId, studentId } = req.params;
+    const student = await Student.findOne({
+      where: {
+        id: studentId,
+        campusId: campusId 
+      }
+    });
+
+    if (student) {
+      student.campusId = null;
+      await student.save();
+
+      res.status(200).json({ message: "Student removed from campus successfully." });
+    } else {
+      res.status(404).json({ message: "No student found with the provided ID on the specified campus." });
+    }
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+}));
+
+
+
 // Export router, so that it can be imported to construct the apiRouter (app.js)
 module.exports = router;
