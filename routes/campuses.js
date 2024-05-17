@@ -39,12 +39,18 @@ router.get('/:id', ash(async(req, res) => {
 
 /* DELETE CAMPUS */
 router.delete('/:id', ash(async(req, res) => {
-  await Campus.destroy({
-    where: {
-      id: req.params.id
-    }
-  });
-  res.status(200).json("Deleted a campus!");
+  try {
+      const numDestroyed = await Campus.destroy({
+          where: { id: req.params.id }
+      });
+      if (numDestroyed) {
+          res.status(200).json({ message: "Campus deleted successfully." });
+      } else {
+          res.status(404).json({ error: "Campus not found." });
+      }
+  } catch (error) {
+      res.status(500).json({ error: error.message });
+  }
 }));
 
 /* ADD NEW CAMPUS */
@@ -55,15 +61,24 @@ router.post('/', ash(async(req, res) => {
 
 /* EDIT CAMPUS */
 router.put('/:id', ash(async(req, res) => {
-  await Campus.update(req.body, {
-    where: {
-      id: req.params.id
+  try {
+    const updates = req.body;
+
+    const updated = await Campus.update(updates, {
+      where: { id: req.params.id },
+      returning: true, 
+    });
+
+    if (updated && updated[0] > 0) {
+      const updatedCampus = updated[1][0]; 
+      res.status(201).json(updatedCampus);
+    } else {
+      res.status(404).json({ message: 'Campus not found or no changes provided' });
     }
-  });
-  // Find campus by Primary Key
-  let campus = await Campus.findByPk(req.params.id, {include: [Student]});  // Get the campus and its associated students
-  res.status(201).json(campus);  // Status code 201 Created - successful creation of a resource
-}))
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+}));
 
 // Export router, so that it can be imported to construct the apiRouter (app.js)
 module.exports = router;
