@@ -82,15 +82,29 @@ router.put('/:id', ash(async(req, res) => {
 
 /* ADD STUDENT TO CAMPUS */
 router.post('/:id/students', ash(async (req, res) => {
-  const { id } = req.params;
+  const { id } = req.params; 
   const studentData = req.body;
+
   const campus = await Campus.findByPk(id);
   if (!campus) {
     return res.status(404).json({ message: 'Campus not found' });
   }
-  const student = await Student.create({ ...studentData, campusId: id });
-  res.status(201).json(student);
+
+  let student = await Student.findOne({ where: { email: studentData.email } });
+
+  if (student) {
+    if (student.campusId) {
+      return res.status(400).json({ message: 'Student is already enrolled in a campus' });
+    }
+    student.campusId = id;
+    await student.save();
+    res.status(200).json(student);
+  } else {
+    const newStudent = await Student.create({ ...studentData, campusId: id });
+    res.status(201).json(newStudent);
+  }
 }));
+
 
 /* REMOVE STUDENT FROM CAMPUS */
 router.delete('/:campusId/students/:studentId', ash(async (req, res) => {

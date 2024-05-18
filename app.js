@@ -36,6 +36,8 @@ const express = require("express");
 // Create an Express application called "app"
 const app = express();
 
+const cors = require('cors');
+
 /* SET UP ROUTES */
 // Import sub-routes and associated router functions for students and campuses
 const apiRouter = require('./routes/index');
@@ -46,6 +48,8 @@ const configureApp = async () => {
   // Middleware to handle request data and response
   app.use(express.json());  // Set up Express to parse JSON requests and generate JSON responses
   app.use(express.urlencoded({ extended: false }));  // Express to parse requests encoded in URL format and querystring
+
+  app.use(cors()); 
 
   // Set up the Express application's main top-level route and attach all sub-routes to it
   // Add main top-level URL path "/api" before sub-routes
