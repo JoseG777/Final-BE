@@ -32,6 +32,7 @@ const Student = db.define("student", {
       min: 0.0,
       max: 4.0,
     },
+    defaultValue: 0.0,
   },
 });
 
